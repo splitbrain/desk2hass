@@ -1,10 +1,12 @@
 //! StatusNotifierItem tray icon (via `ksni`).
 //!
 //! The controller calls `handle.update(|tray| tray.state = …)` after each
-//! change. Menu callbacks run on the ksni thread and only send an `Action`
-//! through the channel.
+//! change. Menu callbacks run on the ksni thread. They start the browser or
+//! send an `Action` through the channel.
 
+use std::process::Command;
 use std::sync::Arc;
+use std::thread;
 
 use crossbeam_channel::Sender;
 use ksni::menu::StandardItem;
@@ -39,6 +41,8 @@ pub struct State {
     pub idle_secs: Option<u64>,
     /// Webcam state that was sent last.
     pub webcam: bool,
+    /// Home Assistant URL of the registration, `None` when not registered.
+    pub url: Option<String>,
 }
 
 /// The tray item.
@@ -51,9 +55,25 @@ pub struct DeskTray {
     pub icons: Arc<Icons>,
 }
 
+impl DeskTray {
+    /// Open the registered Home Assistant in the default browser.
+    fn open_url(&self) {
+        let Some(url) = &self.state.url else {
+            return;
+        };
+        match Command::new("xdg-open").arg(url).spawn() {
+            // Wait in the background, so that the finished process is reaped.
+            Ok(mut child) => {
+                thread::spawn(move || child.wait());
+            }
+            Err(e) => warn!("cannot start xdg-open: {e}"),
+        }
+    }
+}
+
 impl Tray for DeskTray {
-    /// Left click opens the menu, because the menu shows all data.
-    const MENU_ON_ACTIVATE: bool = true;
+    /// Left click opens Home Assistant, right click opens the menu.
+    const MENU_ON_ACTIVATE: bool = false;
 
     fn id(&self) -> String {
         "desk2hass".into()
@@ -77,6 +97,10 @@ impl Tray for DeskTray {
                 true
             }
         }
+    }
+
+    fn activate(&mut self, _x: i32, _y: i32) {
+        self.open_url();
     }
 
     fn icon_pixmap(&self) -> Vec<Icon> {
@@ -110,6 +134,13 @@ impl Tray for DeskTray {
                 if s.webcam { "in use" } else { "not in use" }
             )),
             MenuItem::Separator,
+            StandardItem {
+                label: "Open Home Assistant".into(),
+                enabled: s.url.is_some(),
+                activate: Box::new(|tray: &mut Self| tray.open_url()),
+                ..Default::default()
+            }
+            .into(),
             StandardItem {
                 label: "Quit".into(),
                 activate: Box::new(move |_| {

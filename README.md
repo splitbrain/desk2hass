@@ -76,8 +76,10 @@ The icon color shows the status:
 - red: the last update failed
 - grey: not registered
 
-The menu shows the status, the time of the last update and the values that
-were sent last.
+A left click opens the registered Home Assistant in the default browser
+(with `xdg-open`). A right click opens the menu. The menu shows the status,
+the time of the last update and the values that were sent last. It also has
+an item that opens Home Assistant.
 
 XFCE: The icon needs the "Status Tray" plugin (XFCE 4.16 and later) or the
 "StatusNotifier" plugin in the panel. The "Notification Area" plugin does not

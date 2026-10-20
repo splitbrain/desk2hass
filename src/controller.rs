@@ -113,6 +113,7 @@ impl Controller {
                 Ok(Some(config)) => {
                     self.client = Some(Client::new(&config));
                     self.sensors_registered = false;
+                    self.state.url = Some(config.url);
                 }
                 Ok(None) => {
                     self.set_status(
@@ -140,6 +141,7 @@ impl Controller {
             Err(e) if e.is::<WebhookGone>() => {
                 warn!("{e}");
                 self.client = None;
+                self.state.url = None;
                 self.set_status(
                     Status::NotRegistered,
                     "Device deleted in Home Assistant, run desk2hass --login".into(),
