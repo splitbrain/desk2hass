@@ -72,7 +72,7 @@ The agent reads the sensors each second. It sends an update:
 
 The icon color shows the status:
 
-- green: connected
+- blue: connected
 - red: the last update failed
 - grey: not registered
 

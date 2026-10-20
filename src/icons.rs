@@ -5,8 +5,8 @@ use resvg::tiny_skia;
 
 use crate::tray::Status;
 
-/// Monitor outline. `__FILL__` is replaced with the status color.
-const MONITOR_SVG: &str = include_str!("../assets/monitor.svg");
+/// Home Assistant logo. `__FILL__` is replaced with the status color.
+const LOGO_SVG: &str = include_str!("../assets/homeassistant.svg");
 
 /// Icon sizes reported to the panel. The panel picks the best fit.
 const SIZES: &[u32] = &[22, 44];
@@ -23,7 +23,7 @@ impl Icons {
     pub fn new() -> Self {
         Self {
             not_registered: render_all("#808080"),
-            connected: render_all("#379E4A"),
+            connected: render_all("#18BCF2"),
             error: render_all("#D13D3D"),
         }
     }
@@ -40,7 +40,7 @@ impl Icons {
 
 /// Render the icon in one color in all sizes.
 fn render_all(color: &str) -> Vec<Icon> {
-    let svg = MONITOR_SVG.replace("__FILL__", color);
+    let svg = LOGO_SVG.replace("__FILL__", color);
     let tree =
         usvg::Tree::from_str(&svg, &usvg::Options::default()).expect("embedded SVG is valid");
     SIZES.iter().map(|&size| render(&tree, size)).collect()
