@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=desk2hass
+Comment=Sends the idle time and the webcam use to Home Assistant
+# A shell is necessary because Exec expands no variables; $ must be written as \\$.
+Exec=sh -c "exec \\$HOME/.local/bin/desk2hass"
+Icon=computer
+Terminal=false
+NoDisplay=false
+X-GNOME-Autostart-enabled=true
+Categories=Utility;
